@@ -1,0 +1,9 @@
+configuration:
+  backupStorageLocation: 
+  - name: namebucket
+    provider: "provider2" 
+    bucket: "bucket2" 
+  volumeSnapshotLocation:
+  - name: snapshotname2 
+    provider: "volume_snapshot_provider2" 
+cleanUpCRDs: true
