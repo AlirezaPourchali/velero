@@ -44,7 +44,7 @@ spec:
         emptyDir: {}
       containers:
       - name: minio
-        image: minio/minio:latest
+        image: docker.iranrepo.ir/minio/minio:latest
         imagePullPolicy: IfNotPresent
         args:
         - server
@@ -102,7 +102,7 @@ spec:
         emptyDir: {}
       containers:
       - name: mc
-        image: minio/mc:latest
+        image: docker.iranrepo.ir/minio/mc:latest
         imagePullPolicy: IfNotPresent
         command:
         - /bin/sh
