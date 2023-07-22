@@ -49,7 +49,7 @@ credentials:
 snapshotsEnabled: fales
 deployNodeAgent: true
 # IMP
-upgradeCRDs: false
+upgradeCRDs: true
 
 nodeAgent:
   podVolumePath: /var/lib/kubelet/pods
