@@ -134,6 +134,19 @@ velero restore create --from-backup test-pv-100
 ```
 
 
-# to do
+
 # csi 
+
+For enabling csi in the cluster , 'minikube' in this matter , follow [these](https://github.com/kubernetes-csi/csi-driver-host-path/blob/master/docs/deploy-1.17-and-later.md) steps.     
+
+some of the manifest that you need to apply might have an image that you cannot download (403).    
+
+i have stored the images on dockerhub for easier access and you can apply my modified manifest (or edit the deployments and statefullsets images registry to `docker.iranrepo.ir/salehborhani`)
+
+replaced [manifests](./csi-manifest/)    
+* Snapshotcrd's
+* Snapshot controller
+* manifest.deploy --> changed the images that are deployed within csi-hostpathplugin-0 while running the deploy.sh [script](https://github.com/kubernetes-csi/csi-driver-host-path/blob/master/deploy/kubernetes-1.24) (an example)
+
+
 # volumesnapshot
