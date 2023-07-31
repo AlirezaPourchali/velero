@@ -21,9 +21,9 @@ I want `on-premise` backup so `minio` will be used for that case.
 
 * Another thing to mention is the way k8s `pvc` or `pv` backups work in velero    
 
-    1. If your k8s cluster support `csi` you can get `volumesnapshots` which by its name you can guess what it is.     
+    1 . If your k8s cluster support `csi` you can get `volumesnapshots` which by its name you can guess what it is.     
     
-    2. If you dont have that , you will have to use `file system backup`. this way uses open-source backup tools `restic` and `kopia`.    
+    2 . If you dont have that , you will have to use `file system backup`. this way uses open-source backup tools `restic` and `kopia`.    
     this wont work with `hostPath` volumes.
 
 *Important* : file system backup doesnt work in `minikube` for some [reason](https://github.com/vmware-tanzu/velero/issues/5018#issuecomment-1158966805) . in minikube you can only backup other object     
