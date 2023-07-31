@@ -1,0 +1,386 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: "2023-07-29T11:56:13Z"
+  generateName: csi-hostpathplugin-
+  labels:
+    app.kubernetes.io/component: plugin
+    app.kubernetes.io/instance: hostpath.csi.k8s.io
+    app.kubernetes.io/name: csi-hostpathplugin
+    app.kubernetes.io/part-of: csi-driver-host-path
+    controller-revision-hash: csi-hostpathplugin-84d78d6f4
+    statefulset.kubernetes.io/pod-name: csi-hostpathplugin-0
+  name: csi-hostpathplugin-0
+  namespace: default
+  ownerReferences:
+  - apiVersion: apps/v1
+    blockOwnerDeletion: true
+    controller: true
+    kind: StatefulSet
+    name: csi-hostpathplugin
+    uid: de87eddb-f17b-48d2-b92d-781e0491ff75
+  resourceVersion: "412173"
+  uid: 0881ea77-8ea0-4120-b64e-cfd098d60f89
+spec:
+  containers:
+  - args:
+    - --drivername=hostpath.csi.k8s.io
+    - --v=5
+    - --endpoint=$(CSI_ENDPOINT)
+    - --nodeid=$(KUBE_NODE_NAME)
+    env:
+    - name: CSI_ENDPOINT
+      value: unix:///csi/csi.sock
+    - name: KUBE_NODE_NAME
+      valueFrom:
+        fieldRef:
+          apiVersion: v1
+          fieldPath: spec.nodeName
+    image: docker.iranrepo.ir/salehborhani/hostpathplugin:v1.9.0
+    imagePullPolicy: IfNotPresent
+    livenessProbe:
+      failureThreshold: 5
+      httpGet:
+        path: /healthz
+        port: healthz
+        scheme: HTTP
+      initialDelaySeconds: 10
+      periodSeconds: 2
+      successThreshold: 1
+      timeoutSeconds: 3
+    name: hostpath
+    ports:
+    - containerPort: 9898
+      name: healthz
+      protocol: TCP
+    resources: {}
+    securityContext:
+      privileged: true
+    terminationMessagePath: /dev/termination-log
+    terminationMessagePolicy: File
+    volumeMounts:
+    - mountPath: /csi
+      name: socket-dir
+    - mountPath: /var/lib/kubelet/pods
+      mountPropagation: Bidirectional
+      name: mountpoint-dir
+    - mountPath: /var/lib/kubelet/plugins
+      mountPropagation: Bidirectional
+      name: plugins-dir
+    - mountPath: /csi-data-dir
+      name: csi-data-dir
+    - mountPath: /dev
+      name: dev-dir
+    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+      name: kube-api-access-6vppl
+      readOnly: true
+  - args:
+    - --v=5
+    - --csi-address=$(ADDRESS)
+    - --leader-election
+    env:
+    - name: ADDRESS
+      value: /csi/csi.sock
+    image: docker.iranrepo.ir/salehborhani/csi-external-health-monitor-controller:v0.7.0
+    imagePullPolicy: IfNotPresent
+    name: csi-external-health-monitor-controller
+    resources: {}
+    terminationMessagePath: /dev/termination-log
+    terminationMessagePolicy: File
+    volumeMounts:
+    - mountPath: /csi
+      name: socket-dir
+    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+      name: kube-api-access-6vppl
+      readOnly: true
+  - args:
+    - --v=5
+    - --csi-address=/csi/csi.sock
+    - --kubelet-registration-path=/var/lib/kubelet/plugins/csi-hostpath/csi.sock
+    env:
+    - name: KUBE_NODE_NAME
+      valueFrom:
+        fieldRef:
+          apiVersion: v1
+          fieldPath: spec.nodeName
+    image: docker.iranrepo.ir/salehborhani/csi-node-driver-registrar:v2.6.0
+    imagePullPolicy: IfNotPresent
+    name: node-driver-registrar
+    resources: {}
+    securityContext:
+      privileged: true
+    terminationMessagePath: /dev/termination-log
+    terminationMessagePolicy: File
+    volumeMounts:
+    - mountPath: /csi
+      name: socket-dir
+    - mountPath: /registration
+      name: registration-dir
+    - mountPath: /csi-data-dir
+      name: csi-data-dir
+    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+      name: kube-api-access-6vppl
+      readOnly: true
+  - args:
+    - --csi-address=/csi/csi.sock
+    - --health-port=9898
+    image: docker.iranrepo.ir/salehborhani/livenessprobe:v2.8.0
+    imagePullPolicy: IfNotPresent
+    name: liveness-probe
+    resources: {}
+    terminationMessagePath: /dev/termination-log
+    terminationMessagePolicy: File
+    volumeMounts:
+    - mountPath: /csi
+      name: socket-dir
+    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+      name: kube-api-access-6vppl
+      readOnly: true
+  - args:
+    - --v=5
+    - --csi-address=/csi/csi.sock
+    image: docker.iranrepo.ir/salehborhani/csi-attacher:v4.0.0
+    imagePullPolicy: IfNotPresent
+    name: csi-attacher
+    resources: {}
+    securityContext:
+      privileged: true
+    terminationMessagePath: /dev/termination-log
+    terminationMessagePolicy: File
+    volumeMounts:
+    - mountPath: /csi
+      name: socket-dir
+    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+      name: kube-api-access-6vppl
+      readOnly: true
+  - args:
+    - -v=5
+    - --csi-address=/csi/csi.sock
+    - --feature-gates=Topology=true
+    image: docker.iranrepo.ir/salehborhani/csi-provisioner:v3.3.0
+    imagePullPolicy: IfNotPresent
+    name: csi-provisioner
+    resources: {}
+    securityContext:
+      privileged: true
+    terminationMessagePath: /dev/termination-log
+    terminationMessagePolicy: File
+    volumeMounts:
+    - mountPath: /csi
+      name: socket-dir
+    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+      name: kube-api-access-6vppl
+      readOnly: true
+  - args:
+    - -v=5
+    - -csi-address=/csi/csi.sock
+    image: docker.iranrepo.ir/salehborhani/csi-resizer:v1.6.0
+    imagePullPolicy: IfNotPresent
+    name: csi-resizer
+    resources: {}
+    securityContext:
+      privileged: true
+    terminationMessagePath: /dev/termination-log
+    terminationMessagePolicy: File
+    volumeMounts:
+    - mountPath: /csi
+      name: socket-dir
+    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+      name: kube-api-access-6vppl
+      readOnly: true
+  - args:
+    - -v=5
+    - --csi-address=/csi/csi.sock
+    image: docker.iranrepo.ir/salehborhani/csi-snapshotter:v6.1.0
+    imagePullPolicy: IfNotPresent
+    name: csi-snapshotter
+    resources: {}
+    securityContext:
+      privileged: true
+    terminationMessagePath: /dev/termination-log
+    terminationMessagePolicy: File
+    volumeMounts:
+    - mountPath: /csi
+      name: socket-dir
+    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+      name: kube-api-access-6vppl
+      readOnly: true
+  dnsPolicy: ClusterFirst
+  enableServiceLinks: true
+  hostname: csi-hostpathplugin-0
+  nodeName: minikube
+  preemptionPolicy: PreemptLowerPriority
+  priority: 0
+  restartPolicy: Always
+  schedulerName: default-scheduler
+  securityContext: {}
+  serviceAccount: csi-hostpathplugin-sa
+  serviceAccountName: csi-hostpathplugin-sa
+  subdomain: csi-hostpathplugin
+  terminationGracePeriodSeconds: 30
+  tolerations:
+  - effect: NoExecute
+    key: node.kubernetes.io/not-ready
+    operator: Exists
+    tolerationSeconds: 300
+  - effect: NoExecute
+    key: node.kubernetes.io/unreachable
+    operator: Exists
+    tolerationSeconds: 300
+  volumes:
+  - hostPath:
+      path: /var/lib/kubelet/plugins/csi-hostpath
+      type: DirectoryOrCreate
+    name: socket-dir
+  - hostPath:
+      path: /var/lib/kubelet/pods
+      type: DirectoryOrCreate
+    name: mountpoint-dir
+  - hostPath:
+      path: /var/lib/kubelet/plugins_registry
+      type: Directory
+    name: registration-dir
+  - hostPath:
+      path: /var/lib/kubelet/plugins
+      type: Directory
+    name: plugins-dir
+  - hostPath:
+      path: /var/lib/csi-hostpath-data/
+      type: DirectoryOrCreate
+    name: csi-data-dir
+  - hostPath:
+      path: /dev
+      type: Directory
+    name: dev-dir
+  - name: kube-api-access-6vppl
+    projected:
+      defaultMode: 420
+      sources:
+      - serviceAccountToken:
+          expirationSeconds: 3607
+          path: token
+      - configMap:
+          items:
+          - key: ca.crt
+            path: ca.crt
+          name: kube-root-ca.crt
+      - downwardAPI:
+          items:
+          - fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
+            path: namespace
+status:
+  conditions:
+  - lastProbeTime: null
+    lastTransitionTime: "2023-07-29T11:56:13Z"
+    status: "True"
+    type: Initialized
+  - lastProbeTime: null
+    lastTransitionTime: "2023-07-29T11:56:15Z"
+    status: "True"
+    type: Ready
+  - lastProbeTime: null
+    lastTransitionTime: "2023-07-29T11:56:15Z"
+    status: "True"
+    type: ContainersReady
+  - lastProbeTime: null
+    lastTransitionTime: "2023-07-29T11:56:13Z"
+    status: "True"
+    type: PodScheduled
+  containerStatuses:
+  - containerID: docker://1eba42e449f2e5541d2304d58c0ed872b321e30d28eac6d495527daba3110caa
+    image: docker.iranrepo.ir/salehborhani/csi-attacher:v4.0.0
+    imageID: docker-pullable://docker.iranrepo.ir/salehborhani/csi-attacher@sha256:823876e97db02bbe3acc73432577d2f8e71465c0f60bd9d93a8703ff04f514bf
+    lastState: {}
+    name: csi-attacher
+    ready: true
+    restartCount: 0
+    started: true
+    state:
+      running:
+        startedAt: "2023-07-29T11:56:15Z"
+  - containerID: docker://8f05cab9a19da42901fb850c9af6d4dcc1fc2c6725d8f203c9f01e9751a0b08a
+    image: docker.iranrepo.ir/salehborhani/csi-external-health-monitor-controller:v0.7.0
+    imageID: docker-pullable://docker.iranrepo.ir/salehborhani/csi-external-health-monitor-controller@sha256:24fa0feee5fda50f10667d04fadc3cd5ee0ed89e8655481ad6fd4ab1890a778f
+    lastState: {}
+    name: csi-external-health-monitor-controller
+    ready: true
+    restartCount: 0
+    started: true
+    state:
+      running:
+        startedAt: "2023-07-29T11:56:14Z"
+  - containerID: docker://c87685aadc683324511bc8ac91b50867fdbea4bcdff2bb935f82aed622c1ab27
+    image: docker.iranrepo.ir/salehborhani/csi-provisioner:v3.3.0
+    imageID: docker-pullable://docker.iranrepo.ir/salehborhani/csi-provisioner@sha256:861498e1780b17faa6d9d6a457124a53a1d2f66bb485b47c9335e20218d599e1
+    lastState: {}
+    name: csi-provisioner
+    ready: true
+    restartCount: 0
+    started: true
+    state:
+      running:
+        startedAt: "2023-07-29T11:56:15Z"
+  - containerID: docker://4830bbbeb4409a4d2c7460de215997bed8563b8b5faed42699f6784574da4365
+    image: docker.iranrepo.ir/salehborhani/csi-resizer:v1.6.0
+    imageID: docker-pullable://docker.iranrepo.ir/salehborhani/csi-resizer@sha256:3a82ea11ca4383a2ed3c76c4b2aaa062af3863ce03823aec6e6c2dd71b4d6aec
+    lastState: {}
+    name: csi-resizer
+    ready: true
+    restartCount: 0
+    started: true
+    state:
+      running:
+        startedAt: "2023-07-29T11:56:15Z"
+  - containerID: docker://4dae13f5ddf0ba7f68e74b7109cbe60fc1f8c1dad9d1426d2fc2fedf0ce9be6d
+    image: docker.iranrepo.ir/salehborhani/csi-snapshotter:v6.1.0
+    imageID: docker-pullable://docker.iranrepo.ir/salehborhani/csi-snapshotter@sha256:f8dfc9284f00b636821c73d4ed2f26d01df03a4489ad16c26c4508c61fca42b6
+    lastState: {}
+    name: csi-snapshotter
+    ready: true
+    restartCount: 0
+    started: true
+    state:
+      running:
+        startedAt: "2023-07-29T11:56:15Z"
+  - containerID: docker://aa0fb1fa99464e1c0d844ff8a6c40882ce38a20fbd35b43066845d94bbabe163
+    image: docker.iranrepo.ir/salehborhani/hostpathplugin:v1.9.0
+    imageID: docker-pullable://docker.iranrepo.ir/salehborhani/hostpathplugin@sha256:99d0874a37443e8706a515a41b44464297797b8315bcb799310377d10ebbe6c7
+    lastState: {}
+    name: hostpath
+    ready: true
+    restartCount: 0
+    started: true
+    state:
+      running:
+        startedAt: "2023-07-29T11:56:14Z"
+  - containerID: docker://a3e6b7d6826b37df182ec27f64b727ab4270c4947f40c4fee50972064c6894dd
+    image: docker.iranrepo.ir/salehborhani/livenessprobe:v2.8.0
+    imageID: docker-pullable://docker.iranrepo.ir/salehborhani/livenessprobe@sha256:482b93593d9a774b7970c2e865202dbfe162d9d3ffb48d4f3a4665517a2589c7
+    lastState: {}
+    name: liveness-probe
+    ready: true
+    restartCount: 0
+    started: true
+    state:
+      running:
+        startedAt: "2023-07-29T11:56:15Z"
+  - containerID: docker://27f1c07fa37f172fdd03d7dca288615d6baa22bff925966dd3cf523c1373c1c1
+    image: docker.iranrepo.ir/salehborhani/csi-node-driver-registrar:v2.6.0
+    imageID: docker-pullable://docker.iranrepo.ir/salehborhani/csi-node-driver-registrar@sha256:ab710f8bd931da44425acb560c9739a330259677b3c850b6f6a48b2986b8d90c
+    lastState: {}
+    name: node-driver-registrar
+    ready: true
+    restartCount: 0
+    started: true
+    state:
+      running:
+        startedAt: "2023-07-29T11:56:15Z"
+  hostIP: 192.168.49.2
+  phase: Running
+  podIP: 10.244.1.190
+  podIPs:
+  - ip: 10.244.1.190
+  qosClass: BestEffort
+  startTime: "2023-07-29T11:56:13Z"

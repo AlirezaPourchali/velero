@@ -1,0 +1,134 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: "2023-07-29T11:55:50Z"
+  generateName: csi-hostpath-socat-
+  labels:
+    app.kubernetes.io/component: socat
+    app.kubernetes.io/instance: hostpath.csi.k8s.io
+    app.kubernetes.io/name: csi-hostpath-socat
+    app.kubernetes.io/part-of: csi-driver-host-path
+    controller-revision-hash: csi-hostpath-socat-7df6f7c565
+    statefulset.kubernetes.io/pod-name: csi-hostpath-socat-0
+  name: csi-hostpath-socat-0
+  namespace: default
+  ownerReferences:
+  - apiVersion: apps/v1
+    blockOwnerDeletion: true
+    controller: true
+    kind: StatefulSet
+    name: csi-hostpath-socat
+    uid: 2359fe66-a1c2-4a59-a9b3-d8d03f249408
+  resourceVersion: "412089"
+  uid: 818abddf-f9c5-4ec5-8d7e-19cdcdf3692a
+spec:
+  affinity:
+    podAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchExpressions:
+          - key: app.kubernetes.io/instance
+            operator: In
+            values:
+            - hostpath.csi.k8s.io
+        topologyKey: kubernetes.io/hostname
+  containers:
+  - args:
+    - tcp-listen:10000,fork,reuseaddr
+    - unix-connect:/csi/csi.sock
+    image: docker.iranrepo.ir/alpine/socat:1.7.4.3-r0
+    imagePullPolicy: IfNotPresent
+    name: socat
+    resources: {}
+    securityContext:
+      privileged: true
+    terminationMessagePath: /dev/termination-log
+    terminationMessagePolicy: File
+    volumeMounts:
+    - mountPath: /csi
+      name: socket-dir
+    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+      name: kube-api-access-4jgp6
+      readOnly: true
+  dnsPolicy: ClusterFirst
+  enableServiceLinks: true
+  hostname: csi-hostpath-socat-0
+  nodeName: minikube
+  preemptionPolicy: PreemptLowerPriority
+  priority: 0
+  restartPolicy: Always
+  schedulerName: default-scheduler
+  securityContext: {}
+  serviceAccount: default
+  serviceAccountName: default
+  subdomain: csi-hostpath-socat
+  terminationGracePeriodSeconds: 30
+  tolerations:
+  - effect: NoExecute
+    key: node.kubernetes.io/not-ready
+    operator: Exists
+    tolerationSeconds: 300
+  - effect: NoExecute
+    key: node.kubernetes.io/unreachable
+    operator: Exists
+    tolerationSeconds: 300
+  volumes:
+  - hostPath:
+      path: /var/lib/kubelet/plugins/csi-hostpath
+      type: DirectoryOrCreate
+    name: socket-dir
+  - name: kube-api-access-4jgp6
+    projected:
+      defaultMode: 420
+      sources:
+      - serviceAccountToken:
+          expirationSeconds: 3607
+          path: token
+      - configMap:
+          items:
+          - key: ca.crt
+            path: ca.crt
+          name: kube-root-ca.crt
+      - downwardAPI:
+          items:
+          - fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
+            path: namespace
+status:
+  conditions:
+  - lastProbeTime: null
+    lastTransitionTime: "2023-07-29T11:55:50Z"
+    status: "True"
+    type: Initialized
+  - lastProbeTime: null
+    lastTransitionTime: "2023-07-29T11:55:51Z"
+    status: "True"
+    type: Ready
+  - lastProbeTime: null
+    lastTransitionTime: "2023-07-29T11:55:51Z"
+    status: "True"
+    type: ContainersReady
+  - lastProbeTime: null
+    lastTransitionTime: "2023-07-29T11:55:50Z"
+    status: "True"
+    type: PodScheduled
+  containerStatuses:
+  - containerID: docker://64731d201ae6910df4a47217752b29548edc0c1f6d5dc8b061074d1018bca445
+    image: alpine/socat:1.7.4.3-r0
+    imageID: docker-pullable://alpine/socat@sha256:acddcaba75c107cf807d1131788e931163d2fa778bc229ff97b32ca85954842c
+    lastState: {}
+    name: socat
+    ready: true
+    restartCount: 0
+    started: true
+    state:
+      running:
+        startedAt: "2023-07-29T11:55:51Z"
+  hostIP: 192.168.49.2
+  phase: Running
+  podIP: 10.244.1.189
+  podIPs:
+  - ip: 10.244.1.189
+  qosClass: BestEffort
+  startTime: "2023-07-29T11:55:50Z"
