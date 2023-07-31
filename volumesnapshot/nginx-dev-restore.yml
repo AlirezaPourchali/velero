@@ -1,0 +1,20 @@
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx-test-restore3
+  namespace: development
+spec:
+  volumes:
+    - name: mystorage
+      persistentVolumeClaim:
+        claimName: restore-pvc-csitest3
+  containers:
+    - name: task-pv-container
+      image: docker.iranrepo.ir/nginx:alpine
+      ports:
+        - containerPort: 80
+          name: "http-server"
+      volumeMounts:
+        - mountPath: "/usr/share/nginx/html"
+          name: mystorage

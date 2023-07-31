@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: restore-pvc-csitest3
+spec:
+#  storageClassName: rook-ceph-csi-rbdplugin
+  dataSource:
+    name: snapcontent-fcae67e0-819f-4008-97d4-62b46ed209f5
+    kind: VolumeSnapshotContent
+    apiGroup: snapshot.storage.k8s.io
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi

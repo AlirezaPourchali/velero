@@ -1,0 +1,8 @@
+apiVersion: snapshot.storage.k8s.io/v1
+kind: VolumeSnapshot
+metadata:
+  name: new-snapshot-test5
+spec:
+  volumeSnapshotClassName: rook-ceph-csi-rbdplugin
+  source:
+    persistentVolumeClaimName: restore-pvc-csitest3
