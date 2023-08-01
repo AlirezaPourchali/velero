@@ -9,4 +9,4 @@ releases:
   version: 4.1.3
   chart: vmware-tanzu/velero
   values:
-    - ./values.yml
+    - ./values/new.yaml

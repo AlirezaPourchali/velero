@@ -46,7 +46,7 @@ git clone https://github.com/AlirezaPourchali/velero.git
 
 cd velero
 
-helm install velero --namespace velero vmware-tanzu/velero --values values.yml --version 4.1.3
+helm install velero --namespace velero vmware-tanzu/velero --values values/new.yml --version 4.1.3
 ```
 * you might need to create `velero` namespace before installing the chart.
 
@@ -55,10 +55,7 @@ There is also a helmfile which you have to install as well and deploy it with th
 ```
 helmfile apply
 ```
-* Or use the script to install with velero-cli 
-```
-./velero.sh
-```
+
 
 # deploy minio
 * For minio apply the yaml file like bellow
@@ -75,25 +72,24 @@ kubectl apply -f examples/minio/00-minio-deployment.yaml
 * lets deploy a test pod and backup pvc
 
 ```
-kubectl apply -f nginx-test.yml
+kubectl apply -f nginx-velero-pvc.yml
+kubectl apply -f nginx-velero.yml
 ```
 
-* its a nginx pod with a pvc and a namespace creation
-
-* change your namespace to `test-velero` , and lets put some data in there.
+* lets put some data in there.
 
 ```
 kubectl exec -it nginx-test sh
 ```
 
-* lets create a random file around 10mb inside the pod  
+* create a random file around 10mb inside the pod  
 
 ```
 $ dd if=/dev/urandom of=/usr/share/nginx/html/test-file3.txt count=10000 bs=1024
 
 $ ls -laSh /usr/share/nginx/html/
 ```
-* for the backup to work , the node agent will check the annotation of a pod
+* for the backup to work , the node agent will check the annotation of a pod and the name of the volume you set
 
 * there are 3 ways opt-in , opt-out stated [here](https://velero.io/docs/v1.11/file-system-backup/)
 * another way to go around this , in the velero chart set
@@ -106,19 +102,23 @@ defaultVolumesToFsBackup: false
 * we use opt-in 
 
 ```
-kubectl -n test-nginx  annotate pod/nginx-test backup.velero.io/backup-volumes=mystorage
+kubectl  annotate pod nginx-test3 backup.velero.io/backup-volumes=mystorage 
+# mystorage is the name of the volume , see the pod manifest.
 ```
 
 * now to backup 
 
 ```
-velero backup create test-pv-100  --include-namespaces test-nginx  --include-resources  persistentvolumeclaims,persistentvolumes.pods --wait
+velero backup create test-pv-100  --include-namespaces velero  --include-resources  persistentvolumeclaims,persistentvolumes.pods --selector app=nginx --wait -v=5
 ```
-* for this to work you need permissions to a lot of objects and resources
+
+* for this to work , you need permissions to a lot of objects and resources
 
 * you can debug it with `velero backup describe` or `velero backup logs` commands 
 
 * you can check your minio to see if the backup is done successfully or not.
+
+* if you get something like "minio.svc" cannot be resolved , do next step (port-forward) before backingup.
 
 * install [minio-client](https://min.io/docs/minio/linux/reference/minio-mc.html)
 
