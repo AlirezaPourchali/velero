@@ -21,10 +21,13 @@ I want `on-premise` backup so `minio` will be used for that case.
 
 * Another thing to mention is the way k8s `pvc` or `pv` backups work in velero    
 
-    1 . If your k8s cluster support `csi` you can get `volumesnapshots` which by its name you can guess what it is.     
+1 . If your k8s cluster support `csi` you can get `volumesnapshots` which by its name you can guess what it is.     
+    * One Important to consider is that the content of the snapshots (the actual data) is not backed up in minio or s3 storage providers    
     
-    2 . If you dont have that , you will have to use `file system backup`. this way uses open-source backup tools `restic` and `kopia`.    
+2 . If you dont have that , you will have to use `file system backup`. this way uses open-source backup tools `restic` and `kopia`.    
     this wont work with `hostPath` volumes.
+
+3. or enable `csi` like [here](https://github.com/AlirezaPourchali/velero/edit/main/README.md#csi)
 
 *Important* : file system backup doesnt work in `minikube` for some [reason](https://github.com/vmware-tanzu/velero/issues/5018#issuecomment-1158966805) . in minikube you can only backup other object     
 
@@ -82,17 +85,18 @@ kubectl apply -f nginx-test.yml
 kubectl exec -it nginx-test sh
 ```
 
-* inside the pods container
+* lets create a random file around 10mb inside the pod  
 
 ```
-$ dd if=/dev/urandom of=/usr/share/nginx/html/test-file3.txt count=512000 bs=1024
+$ dd if=/dev/urandom of=/usr/share/nginx/html/test-file3.txt count=10000 bs=1024
 
 $ ls -laSh /usr/share/nginx/html/
 ```
 * for the backup to work , the node agent will check the annotation of a pod
 
-* there are 2 ways opt-in , opt-out stated [here](https://velero.io/docs/v1.11/file-system-backup/)
-
+* there are 3 ways opt-in , opt-out stated [here](https://velero.io/docs/v1.11/file-system-backup/)
+* another way to go around this , in the velero chart set
+the following parameter to backup by restic by default.
 * we use opt-in 
 
 ```
