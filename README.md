@@ -22,14 +22,15 @@ I want `on-premise` backup so `minio` will be used for that case.
 * Another thing to mention is the way k8s `pvc` or `pv` backups work in velero    
 
 1 . If your k8s cluster support `csi` you can get `volumesnapshots` which by its name you can guess what it is.     
-    * One Important to consider is that the content of the snapshots (the actual data) is not backed up in minio or s3 storage providers    
+* One Important to consider is that the content of the snapshots (the actual data) is not backed up in minio or s3 storage providers    
     
 2 . If you dont have that , you will have to use `file system backup`. this way uses open-source backup tools `restic` and `kopia`.    
     this wont work with `hostPath` volumes.
 
 3. or enable `csi` like [here](https://github.com/AlirezaPourchali/velero/edit/main/README.md#csi)
 
-*Important* : file system backup doesnt work in `minikube` for some [reason](https://github.com/vmware-tanzu/velero/issues/5018#issuecomment-1158966805) . in minikube you can only backup other object     
+*Important* : file system backup doesnt work in `minikube` for some [reason](https://github.com/vmware-tanzu/velero/issues/5018#issuecomment-1158966805) . in minikube you can only backup other object 
+or enable csi for minikube and backup with snapshots.
 
 
 
@@ -97,6 +98,11 @@ $ ls -laSh /usr/share/nginx/html/
 * there are 3 ways opt-in , opt-out stated [here](https://velero.io/docs/v1.11/file-system-backup/)
 * another way to go around this , in the velero chart set
 the following parameter to backup by restic by default.
+
+```
+defaultVolumesToFsBackup: false
+```
+
 * we use opt-in 
 
 ```
@@ -106,7 +112,7 @@ kubectl -n test-nginx  annotate pod/nginx-test backup.velero.io/backup-volumes=m
 * now to backup 
 
 ```
-velero backup create test-pv-100  --include-namespaces test-nginx  --include-resources  persistentvolumeclaims,persistentvolumes --wait
+velero backup create test-pv-100  --include-namespaces test-nginx  --include-resources  persistentvolumeclaims,persistentvolumes.pods --wait
 ```
 * for this to work you need permissions to a lot of objects and resources
 
@@ -126,17 +132,28 @@ kubectl port-forward <minio-pod> 9000:9000
 * in another shell
 
 ```
-mc ls local/velero2/backups/test-pv-100 
+mc ls local/velero/backups/restic/velero
 ```
-* check the volume size . if its not about 500 megabytes there is something wrong
+* in this directory you should see a `data` subdirectory    
+it contains **the data from the volume you annotated**.
+
+* inside `data` directory subdirectories will be made (i think the names are the first 2 characters of the hashed backup name) 
+
+* there should be a file arount 10mb there.
 
 # restoring 
 
-* delete the namespace , and run the following 
+* delete the pod and pvc and pv , and run the following 
 ```
 velero restore create --from-backup test-pv-100 
 ```
+* it will create your pvc , pv , pod.
 
+* if you check the pod you will see that an `init container` is used to get the data from minio to the volume.
+
+* it uses the `velero-restore-helper` image , which can be modified by a [configmap](https://velero.io/docs/v1.11/file-system-backup/#customize-restore-helper-container).   
+
+note: could get the configmap to work yet
 
 
 # csi 
