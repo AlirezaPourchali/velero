@@ -27,7 +27,7 @@ I want `on-premise` backup so `minio` will be used for that case.
 2 . If you dont have that , you will have to use `file system backup`. this way uses open-source backup tools `restic` and `kopia`.    
     this wont work with `hostPath` volumes.
 
-3. or enable `csi` like [here](https://github.com/AlirezaPourchali/velero/edit/main/README.md#csi)
+3. or enable `csi` like [here](https://github.com/AlirezaPourchali/velero#csi)
 
 *Important* : file system backup doesnt work in `minikube` for some [reason](https://github.com/vmware-tanzu/velero/issues/5018#issuecomment-1158966805) . in minikube you can only backup other object 
 or enable csi for minikube and backup with snapshots.
